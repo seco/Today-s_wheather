@@ -1,4 +1,4 @@
-package sdjang.today.wheather;
+package home.web;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -33,7 +33,7 @@ public class HomeController {
 		
 		model.addAttribute("serverTime", formattedDate );
 		
-		return "home";
+		return "main/home";
 	}
 	
 }

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+						http://www.springframework.org/schema/jdbc  http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd">
+
+
+	<bean id="dataSourceSpied" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+		<!-- Local Server Start -->
+		<property name="url" value="jdbc:oracle:thin:@203.239.163.118:1521:orcl" />
+		<!-- <property name="username" value="USR_GS" /> -->
+		<property name="username" value="usr_gs" />
+		<property name="password" value="s12345" />
+
+		<!-- Real Server Start -->
+		<!-- <property name="url" value="jdbc:oracle:thin:@98.33.1.48:1521:UNTDB1"/> -->
+		<!-- <property name="username" value="usr_lms"/>
+		<property name="password" value="dkagh365"/> -->
+
+		<!-- <property name="username" value="gg_lms"/> -->
+		<!-- <property name="username" value="lmsusr2"/> -->
+	</bean>
+
+	<bean id="DataSource" class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+		<constructor-arg ref="dataSourceSpied" />
+		<property name="logFormatter">
+			<bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+				<property name="loggingType" value="MULTI_LINE" />
+				<property name="sqlPrefix" value="" />
+			</bean>
+		</property>
+	</bean>
+
+</beans> 
