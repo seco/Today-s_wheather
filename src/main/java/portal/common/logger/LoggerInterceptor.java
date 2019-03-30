@@ -1,4 +1,4 @@
-package LoggerInterceptor;
+package portal.common.logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

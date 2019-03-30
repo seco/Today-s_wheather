@@ -1,4 +1,4 @@
-package wth.web;
+package portal.wth.web;
 
 public class WthController {
 
