@@ -13,6 +13,8 @@ target/
 
 #properties
 local.properties
+*.properties
+
 
 #bin
 bin/

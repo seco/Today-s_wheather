@@ -29,7 +29,10 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
 		<servlet-name>appServlet</servlet-name>
 		<url-pattern>*.do</url-pattern>
 	</servlet-mapping>
-
+	<servlet-mapping>
+		<servlet-name>appServlet</servlet-name>
+		<url-pattern>*.ajax</url-pattern>
+	</servlet-mapping>
 	
 	<filter>
 		<filter-name>encodingFilter</filter-name> 

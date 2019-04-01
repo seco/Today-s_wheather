@@ -1,0 +1,788 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MgntGsSuggestRegistrationService">
+	
+<!--     <resultMap type="java.util.HashMap" id="tempSuggestInfo">
+      <result property="titNm" 	     column="TIT_NM"         javaType="java.lang.String" />
+      <result property="voteYn"      column="VOTE_YN"        javaType="java.lang.String" />
+      <result property="buCn"        column="BU_CN"          jdbcType="CLOB" javaType="java.lang.String" />
+      <result property="buSeqNo"     column="BU_SEQ_NO"      javaType="java.lang.String" />
+      <result property="buGrpNo"     column="BU_GRP_NO"      javaType="java.lang.String" />
+      <result property="buGrpRplyOr" column="BU_GRP_RPLY_OR" javaType="java.lang.String" />
+      <result property="buRplyLvlNo" column="BU_RPLY_LVL_NO" javaType="java.lang.String" />
+      <result property="wrPerNo"     column="WR_PER_NO"      javaType="java.lang.String" />
+      <result property="wrPerNm"     column="WR_PER_NM"      javaType="java.lang.String" />
+      <result property="sgtCd"       column="SGT_CD"         javaType="java.lang.String" />
+      <result property="sgtSubCd"    column="SGT_SUB_CD"     javaType="java.lang.String" />
+      <result property="lectNm"      column="LECT_NM"        javaType="java.lang.String" />
+      <result property="buRecm"      column="BU_RECM"        javaType="java.lang.String" />
+      <result property="sgtSubNm"    column="SGT_SUB_NM"     javaType="java.lang.String" />
+      <result property="sgtTgtCd"    column="SGT_TGT_CD"     javaType="java.lang.String" />
+      <result property="sgtTgtNm"    column="SGT_TGT_NM"     javaType="java.lang.String" />
+   </resultMap> -->
+ <!--    
+   <select id="selectCommBbList"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO"
+      resultType="egovMap">
+      /*   mgnt.gs.suggest.registration.SuggestRegistrationService.selectCommBbList */
+      <![CDATA[
+      SELECT C.*
+      FROM(
+          SELECT B.*, ROWNUM AS RO
+          FROM (
+              SELECT A.*
+              FROM(
+                  SELECT Z.*,ROWNUM AS ROLINE
+                  FROM (
+                      SELECT  Y.*
+                      FROM (
+                     SELECT
+                             X.BU_SEQ_NO, X.TIT_NM, X.BU_GRP_NO, X.BU_GRP_RPLY_OR, X.BU_RPLY_LVL_NO,
+                             X.BU_CMT_T, X.WR_PER_NM, X.BU_RECM_T, X.WR_DTM, X.SGT_CD
+                     FROM (
+                        SELECT
+                           A.BU_SEQ_NO, A.TIT_NM, A.BU_GRP_NO, A.BU_GRP_RPLY_OR, A.BU_RPLY_LVL_NO,
+                                 A.BU_CMT_T, A.WR_PER_NM, A.BU_RECM_T, A.WR_DTM, A.SGT_CD
+                               FROM TB_GS_SUGST_BB A
+                        WHERE A.DEL_YN = 'N'
+                  ]]>
+                   <if test="searchWord != null and searchWord != '' ">
+                       <if test="searchKey == 1">
+                     <![CDATA[   AND UPPER(TIT_NM) LIKE '%'||replace(UPPER(#{searchWord}),'%','\%')||'%' escape '\' ]]>
+                     </if>
+                     <if test="searchKey == 2">
+                     <![CDATA[   AND UPPER(WR_PER_NM) LIKE '%'||replace(UPPER(#{searchWord}),'%','\%')||'%' escape '\' ]]>
+                     </if>
+                  </if>
+                  <![CDATA[
+                         ) X
+                  ) Y
+                  ORDER BY Y.MAIN_BU_RECM_T ASC, Y.BU_GRP_NO DESC, Y.BU_GRP_RPLY_OR DESC, Y.BU_RPLY_LVL_NO DESC
+               ) Z
+            ) A
+            ORDER  BY ROLINE DESC
+         ) B
+      ) C
+      WHERE RO > #{firstIndex}
+         AND RO <= #{firstIndex} + #{recordCountPerPage}         
+      ]]>
+   </select>
+   
+   <select id="selectCommBbList_S02"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO"
+      resultType="egovMap">
+      /*   mgnt.gs.suggest.registration.SuggestRegistrationService.selectCommBbList_S02 */
+      <![CDATA[
+      SELECT B.*
+      		,FN_LS_COMM_NM('SGT_CD', B.SGT_CD) AS SGT_CD_NM
+            ,CASE 
+             WHEN B.SGT_CD = '1' THEN
+                 FN_LS_COMM_NM('SGT_SUB_EDU_CD', B.SGT_SUB_CD)
+             WHEN B.SGT_CD = '2' THEN
+                 FN_LS_COMM_NM('SGT_SUB_FOR_CD', B.SGT_SUB_CD)
+             ELSE 
+                 '-'
+             END AS SGT_SUB_CD_NM
+      FROM (
+          SELECT A.*, ROWNUM AS RO
+          FROM(
+              SELECT Z.*
+              FROM (
+                  SELECT  Y.*,ROWNUM AS ROLINE , COUNT(*) OVER() SEARCH_CNT
+                  FROM (
+                  SELECT
+                          X.BU_SEQ_NO, X.TIT_NM, X.BU_GRP_NO, X.BU_GRP_RPLY_OR, X.BU_RPLY_LVL_NO,
+                          X.BU_CMT_T, X.WR_PER_NM, X.BU_RECM_T, X.WR_DTM, X.LECT_NM, X.BU_RECM ,X.VOTE_YN, X.INQ_T, X.SGT_SUB_CD, X.SGT_CD, 
+                          X.SGT_SUB_NM, X.SGT_TGT_CD, X.SGT_TGT_NM  
+                  FROM (
+                      SELECT
+                          A.BU_SEQ_NO, A.TIT_NM, A.BU_GRP_NO, A.BU_GRP_RPLY_OR, A.BU_RPLY_LVL_NO,
+                          A.BU_CMT_T, A.WR_PER_NM, A.BU_RECM_T, A.WR_DTM, A.LECT_NM, A.BU_RECM, 
+                          A.VOTE_YN, A.INQ_T, A.SGT_SUB_CD, A.SGT_CD, A.SGT_SUB_NM, A.SGT_TGT_CD, A.SGT_TGT_NM  
+                      FROM TB_GS_SUGST_BB A
+                      WHERE
+                      	A.DEL_YN = 'N'
+              ]]>
+              <if test="searchWord != null and searchWord != '' ">
+                  <if test="searchKey == 1">
+                  <![CDATA[   AND UPPER(TIT_NM) LIKE '%'||replace(UPPER(#{searchWord}),'%','\%')||'%' escape '\' ]]>
+                  </if>
+                  <if test="searchKey == 2">
+                  <![CDATA[   AND UPPER(WR_PER_NM) LIKE '%'||replace(UPPER(#{searchWord}),'%','\%')||'%' escape '\' ]]>
+                  </if>
+              </if>
+              <if test="searchSgtCd != null and searchSgtCd != 0 ">
+                  <![CDATA[   AND SGT_CD = #{searchSgtCd} ]]>
+              </if>
+         	  <if test="searchVoteYn != null and searchVoteYn != 0 ">
+                  <![CDATA[   AND VOTE_YN = #{searchVoteYn} ]]>
+              </if>
+                  <![CDATA[
+                       ) X
+               ORDER BY 
+              ]]>
+              <choose>
+                  <when test="'buRecmT'.equals(sidx)">
+                      <choose>
+                          <when test="'desc'.equals(sord)">
+                              X.BU_RECM_T desc,
+                          </when>
+                          <when test="'asc'.equals(sord)">
+                              X.BU_RECM_T asc,
+                          </when>
+                      </choose>
+                  </when>
+                  <when test="'wrDtm'.equals(sidx)">
+                      <choose>
+                          <when test="'desc'.equals(sord)">
+                              X.WR_DTM desc,
+                          </when>
+                          <when test="'asc'.equals(sord)">
+                              X.WR_DTM asc,
+                          </when>
+                      </choose>
+                  </when>
+                  <when test="'buCmtT'.equals(sidx)">
+                      <choose>
+                          <when test="'desc'.equals(sord)">
+                              X.BU_CMT_T desc,
+                          </when>
+                          <when test="'asc'.equals(sord)">
+                              X.BU_CMT_T asc,
+                          </when>
+                      </choose>
+                  </when>
+                  <when test="'inqT'.equals(sidx)">
+                      <choose>
+                          <when test="'desc'.equals(sord)">
+                              X.INQ_T desc,
+                          </when>
+                          <when test="'asc'.equals(sord)">
+                              X.INQ_T asc,
+                          </when>
+                      </choose>
+                  </when>
+              </choose>
+                  <![CDATA[
+                     X.BU_GRP_NO DESC, X.BU_GRP_RPLY_OR ASC, X.BU_RPLY_LVL_NO DESC
+                 ) Y
+           ) Z
+           ORDER  BY ROLINE ASC
+        ) A
+     ) B
+     WHERE
+       RO BETWEEN #{page} * #{rows} - #{rows} + 1 AND #{page} * #{rows}     
+      ]]>
+   </select>
+   
+   
+   <select id="selectCommBbList_20190305BAK"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO"
+      resultType="egovMap">
+      /*   mgnt.gs.suggest.registration.SuggestRegistrationService.selectCommBbList */
+      <![CDATA[
+      
+      SELECT C.*
+      FROM(
+          SELECT B.*, ROWNUM AS RO
+          FROM (
+              SELECT A.*
+              FROM(
+                  SELECT Z.*,ROWNUM AS ROLINE , COUNT(*) OVER() SEARCH_CNT
+                  FROM (
+                      SELECT  Y.*
+                      FROM (
+                      SELECT
+                          MAX(MAIN_BU_RECM_T) OVER (PARTITION BY BU_GRP_NO ORDER BY BU_GRP_RPLY_OR ASC, BU_RPLY_LVL_NO ASC) AS MAIN_BU_RECM_T, 
+                          MAX(MAIN_WR_DTM) OVER (PARTITION BY BU_GRP_NO ORDER BY BU_GRP_RPLY_OR ASC, BU_RPLY_LVL_NO ASC) AS MAIN_WR_DTM,
+                          MAX(MAIN_BU_CMT_T) OVER (PARTITION BY BU_GRP_NO ORDER BY BU_GRP_RPLY_OR ASC, BU_RPLY_LVL_NO ASC) AS MAIN_BU_CMT_T,
+                          MAX(MAIN_INQ_T) OVER (PARTITION BY BU_GRP_NO ORDER BY BU_GRP_RPLY_OR ASC, BU_RPLY_LVL_NO ASC) AS MAIN_INQ_T,
+                              X.BU_SEQ_NO, X.TIT_NM, X.BU_GRP_NO, X.BU_GRP_RPLY_OR, X.BU_RPLY_LVL_NO,
+                              X.BU_CMT_T, X.WR_PER_NM, X.BU_RECM_T, X.WR_DTM, X.LECT_NM, X.BU_RECM ,X.VOTE_YN, X.INQ_T, X.SGT_SUB_CD, X.SGT_CD
+                      FROM (
+                          SELECT
+                              DECODE(A.BU_RPLY_LVL_NO, '0', A.BU_RECM_T, '0') AS MAIN_BU_RECM_T,
+                              DECODE(A.BU_RPLY_LVL_NO, '0', A.WR_DTM, '0') AS MAIN_WR_DTM,
+                              DECODE(A.BU_RPLY_LVL_NO, '0', A.BU_CMT_T, '0') AS MAIN_BU_CMT_T,
+                              DECODE(A.BU_RPLY_LVL_NO, '0', A.INQ_T, '0') AS MAIN_INQ_T,
+                              A.BU_SEQ_NO, A.TIT_NM, A.BU_GRP_NO, A.BU_GRP_RPLY_OR, A.BU_RPLY_LVL_NO,
+                              A.BU_CMT_T, A.WR_PER_NM, A.BU_RECM_T, A.WR_DTM, A.LECT_NM, A.BU_RECM, 
+                              A.VOTE_YN, A.INQ_T, T.CD_INS_NM AS SGT_SUB_CD, V.CD_INS_NM AS SGT_CD 
+                          FROM TB_GS_SUGST_BB A, TB_LS_COMM_CD T, TB_LS_COMM_CD V
+                          WHERE A.DEL_YN = 'N' AND 
+                              T.CD_ID = 'SGT_SUB_CD' AND
+                              A.SGT_SUB_CD = T.CD_INS_V AND
+                              V.CD_ID = 'SGT_CD' AND
+                              A.SGT_CD = V.CD_INS_V
+                  ]]>
+                  <if test="searchWord != null and searchWord != '' ">
+                      <if test="searchKey == 1">
+                      <![CDATA[   AND UPPER(TIT_NM) LIKE '%'||replace(UPPER(#{searchWord}),'%','\%')||'%' escape '\' ]]>
+                      </if>
+                      <if test="searchKey == 2">
+                      <![CDATA[   AND UPPER(WR_PER_NM) LIKE '%'||replace(UPPER(#{searchWord}),'%','\%')||'%' escape '\' ]]>
+                      </if>
+                  </if>
+                  <if test="searchSgtCd != null and searchSgtCd != 0 ">
+                      <![CDATA[   AND UPPER(SGT_CD) LIKE '%'||replace(UPPER(#{searchSgtCd}),'%','\%')||'%' escape '\' ]]>
+                  </if>
+				  <if test="searchVoteYn != null and searchVoteYn != 0 ">
+                      <![CDATA[   AND UPPER(VOTE_YN) LIKE '%'||replace(UPPER(#{searchVoteYn}),'%','\%')||'%' escape '\' ]]>
+                  </if>
+                      <![CDATA[
+                           ) X
+                       ) Y
+                   ORDER BY 
+                  ]]>
+                  <choose>
+                      <when test="'buRecmT'.equals(sidx)">
+                          <choose>
+                              <when test="'desc'.equals(sord)">
+                                  Y.MAIN_BU_RECM_T desc,
+                              </when>
+                              <when test="'asc'.equals(sord)">
+                                  Y.MAIN_BU_RECM_T asc,
+                              </when>
+                          </choose>
+                      </when>
+                      <when test="'wrDtm'.equals(sidx)">
+                          <choose>
+                              <when test="'desc'.equals(sord)">
+                                 Y.MAIN_WR_DTM desc,
+                              </when>
+                              <when test="'asc'.equals(sord)">
+                                  Y.MAIN_WR_DTM asc,
+                              </when>
+                          </choose>
+                      </when>
+                      <when test="'buCmtT'.equals(sidx)">
+                          <choose>
+                              <when test="'desc'.equals(sord)">
+                                  Y.MAIN_BU_CMT_T desc,
+                              </when>
+                              <when test="'asc'.equals(sord)">
+                                  Y.MAIN_BU_CMT_T asc,
+                              </when>
+                          </choose>
+                      </when>
+                      <when test="'inqT'.equals(sidx)">
+                          <choose>
+                              <when test="'desc'.equals(sord)">
+                                  Y.MAIN_INQ_T desc,
+                              </when>
+                              <when test="'asc'.equals(sord)">
+                                  Y.MAIN_INQ_T asc,
+                              </when>
+                          </choose>
+                      </when>
+                  </choose>
+                      <![CDATA[
+                         Y.BU_GRP_NO DESC, Y.BU_GRP_RPLY_OR ASC, Y.BU_RPLY_LVL_NO DESC
+               ) Z
+            ) A
+            ORDER  BY ROLINE ASC
+         ) B
+      ) C
+      WHERE
+       RO BETWEEN #{page} * #{rows} - #{rows} + 1 AND #{page} * #{rows}     
+       
+      ]]>
+
+   </select>
+
+   <select id="selectCommBbListCnt"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO"
+      resultType="java.lang.Integer">
+      /*   mgnt.gs.suggest.registration.SuggestRegistrationService.selectCommBbListCnt*/
+      SELECT
+         COUNT(*) FROM (
+            SELECT
+               X.*,
+               ROWNUM AS RO
+            FROM (
+               SELECT
+                  BU_SEQ_NO,
+                  WR_PER_NM
+               FROM TB_GS_SUGST_BB
+               WHERE DEL_YN='N'
+               <if test="searchWord != null and searchWord != '' ">
+                  <if test="searchKey == 1">
+                     AND UPPER(TIT_NM) LIKE '%'||replace(UPPER(#{searchWord}),'%','\%')||'%' escape '\'
+                  </if>
+                  <if test="searchKey == 2">
+                     AND UPPER(WR_PER_NM) LIKE   '%'||replace(UPPER(#{searchWord}),'%','\%')||'%' escape '\'
+                  </if>
+               </if>
+            ) X
+         ) Z
+   </select>
+   <insert id="insertSuggest"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+      /* mgnt.homepage.board.common.MgntHomepageBoardCommonService.insertSuggest*/
+      <selectKey keyProperty="buSeqNo" resultType="String" order= "BEFORE">
+         SELECT SQ_GS_SUGST_BB.NEXTVAL FROM DUAL
+      </selectKey>
+      <![CDATA[
+         INSERT INTO TB_GS_SUGST_BB
+         (
+            BU_SEQ_NO, 
+            HGRK_BU_SEQ_NO,
+            SGT_CD,
+             TIT_NM,
+             BU_GRP_NO,
+             BU_GRP_RPLY_OR,
+             BU_RPLY_LVL_NO,
+             BU_CMT_T,
+             BU_ATCH_FILE_T,
+             BU_RECM_T,
+             BU_DECL_T,
+             INQ_T,
+             BU_GRP_ID,
+             DEL_YN,
+             DEL_PN_USER_NO,
+             DEL_DTM,
+             VOTE_YN,
+             WR_PER_IP,
+             WR_PER_NM, 
+             WR_PER_NO,
+             WR_DTM,
+             UPDT_PER_NO,
+             UPDT_DTM,
+             BU_CN,
+             BU_RECM,
+             SGT_SUB_CD,
+             LECT_NM,
+             SGT_SUB_NM,
+             SGT_TGT_CD,
+             SGT_TGT_NM
+         ) 
+      VALUES 
+         (
+             #{buSeqNo}, 
+             '0',  
+             #{sgtCd}, 
+             TRIM(#{titNm, jdbcType=VARCHAR}),
+             #{buSeqNo},
+             0, 
+             0, 
+             '0',
+             '0',
+             '0',
+             '0',
+             '0',
+             '0',
+             'N',
+             0,
+             TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS'),
+             #{voteYn, jdbcType=VARCHAR},
+             #{wrPerIp, jdbcType=VARCHAR}, 
+             #{wrPerNm, jdbcType=VARCHAR}, 
+             #{wrPerNo}, 
+             TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS'), 
+             #{wrPerNo}, 
+             TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS'), 
+             REPLACE(#{buCn},'<br/>',chr(10)),
+             #{buRecm, jdbcType=VARCHAR},
+             #{sgtSubCd},
+             #{lectNm, jdbcType=VARCHAR},
+             #{sgtSubNm, jdbcType=VARCHAR},
+             #{sgtTgtCd, jdbcType=VARCHAR},
+             #{sgtTgtNm, jdbcType=VARCHAR}
+         )
+      ]]>
+   </insert>
+   
+   
+   <update id="deleteBb"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+      DELETE FROM TB_GS_SUGST_BB WHERE BU_SEQ_NO = #{buSeqNo} 완전삭제
+      UPDATE 
+         TB_GS_SUGST_BB
+      SET
+         DEL_YN ='Y',
+         DEL_DTM = TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS'),
+         DEL_PN_USER_NO = #{userNo}
+      WHERE 
+         BU_SEQ_NO = #{buSeqNo}
+
+   </update>
+
+   <select id="detailBb"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO"
+      resultMap="tempSuggestInfo">
+      /* mgnt.homepage.board.common.MgntHomepageBoardCommonService.detailBb */
+      <![CDATA[
+      SELECT
+         BU_SEQ_NO,
+         TIT_NM,
+         LECT_NM,
+         VOTE_YN,
+         SGT_CD,
+         SGT_SUB_CD,
+         BU_CN,
+         BU_RECM,
+         BU_GRP_NO,
+         BU_GRP_RPLY_OR,
+         BU_RPLY_LVL_NO,
+         WR_PER_NO,
+         WR_PER_NM,
+         SGT_SUB_NM,
+         SGT_TGT_CD,
+         SGT_TGT_NM
+      FROM TB_GS_SUGST_BB
+      WHERE BU_SEQ_NO = #{buSeqNo}
+         ]]>
+   </select>
+
+
+   <update id="updateBb"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+      <![CDATA[
+      UPDATE 
+         TB_GS_SUGST_BB
+      SET
+         TIT_NM = #{titNm, jdbcType=VARCHAR},
+         SGT_CD = #{sgtCd},
+         SGT_SUB_CD = #{sgtSubCd},
+         BU_RECM = #{buRecm, jdbcType=VARCHAR},
+         LECT_NM = #{lectNm, jdbcType=VARCHAR},
+         VOTE_YN = #{voteYn, jdbcType=VARCHAR},
+         UPDT_PER_NO = #{userNo},
+         UPDT_DTM = TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'),
+         BU_CN =  REPLACE(#{buCn},'<br/>',chr(10)),
+         SGT_SUB_NM = #{sgtSubNm, jdbcType=VARCHAR},
+         SGT_TGT_CD = #{sgtTgtCd, jdbcType=VARCHAR},
+         SGT_TGT_NM = #{sgtTgtNm, jdbcType=VARCHAR}
+      WHERE 
+         BU_SEQ_NO = #{buSeqNo}
+        ]]>
+   </update>
+   
+   <update id = "upBb" parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+       UPDATE TB_GS_SUGST_BB
+       SET
+          BU_RECM_T = BU_RECM_T+1
+      WHERE BU_SEQ_NO = #{buSeqNo}
+   </update>
+   
+   <insert id="insertReBb"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+      /* mgnt.homepage.board.common.MgntHomepageBoardCommonService.insertReBb
+      */
+      <![CDATA[
+         INSERT INTO TB_GS_SUGST_BB
+         (
+            BU_SEQ_NO, 
+            HGRK_BU_SEQ_NO,
+            BDLT_TP_CD,
+             TIT_NM,
+             BU_GRP_NO,
+             BU_GRP_RPLY_OR,
+             BU_RPLY_LVL_NO,
+             BU_CMT_T,
+             BU_ATCH_FILE_T,
+             BU_RECM_T,
+             BU_DECL_T,
+             INQ_T,
+             BU_GRP_ID,
+             LINK_URL,
+             DEL_YN,
+             DEL_PN_USER_NO,
+             DEL_DTM,
+             VOTE_YN,
+             WR_PER_IP,
+             WR_PER_NM, 
+             WR_PER_NO,
+               WR_DTM,
+             UPDT_PER_NO,
+             UPDT_DTM,
+             BU_CN,
+             CONT_URL,
+             CONT_TP_CD
+         ) 
+      VALUES 
+         (
+            SQ_GS_SUGST_BB.NEXTVAL, 
+                #{buSeqNo},  
+                'RE', 
+                TRIM(#{titNm}),
+                #{buGrpNo},
+                #{buGrpRplyOr} + 1, 
+                #{buRplyLvlNo} + 1, 
+                '0',
+                '0',
+                '0',
+                '0',
+                0,
+                '0',
+                '0',
+                'N',
+                '0',
+                TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS'),
+                #{voteYn},
+                #{wrPerIp}, 
+            #{wrPerNm}, 
+            #{wrPerNo}, 
+            TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS'), 
+            #{wrPerNo},  
+            TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS'), 
+            #{buCn},
+            #{contUrl},
+            #{contTpCd}
+         )
+      ]]>
+   </insert>
+   
+   <update id="updateOr" parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+       UPDATE TB_GS_SUGST_BB
+       SET BU_GRP_RPLY_OR = BU_GRP_RPLY_OR + 1
+       WHERE BU_GRP_NO = #{buGrpNo} AND BU_GRP_RPLY_OR > #{buGrpRplyOr}
+   </update>
+
+   <insert id="insertRplyBb"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+      /*   mgnt.gs.suggest.registration.SuggestRegistrationService.insertRplyBb*/
+        <![CDATA[
+         INSERT INTO TB_GS_SUGST_BB_CMT
+         (
+            BU_SEQ_NO, 
+            CMT_NO, 
+            CMT_CN, 
+            CMT_RECM_T, 
+            WR_PER_NM, WR_PER_NO, WR_DTM, UPDT_PER_NO,UPDT_DTM
+         )
+         VALUES
+         (
+            #{buSeqNo},
+            cmtNo_SEQ.nextval, 
+            #{cmtCn},
+            '0',
+            #{wrPerNm},
+            #{wrPerNo},
+            TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS'),
+            #{wrPerNo},
+            TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS') 
+         )
+      ]]>
+   </insert>
+   
+   <update id="increaseRpCnt"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+      /*   mgnt.gs.suggest.registration.SuggestRegistrationService.increaseRpCnt*/
+      <![CDATA[
+      UPDATE 
+         TB_GS_SUGST_BB
+      SET 
+         BU_CMT_T = NVL(BU_CMT_T,0)+1,
+         UPDT_PER_NO = #{wrPerNo},
+         UPDT_DTM = TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS')
+      WHERE 
+         BU_SEQ_NO = #{buSeqNo}
+      ]]>
+   </update>
+   <update id="decreaseRpCnt"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+      /*   mgnt.gs.suggest.registration.SuggestRegistrationService.decreaseRpCnt*/
+      <![CDATA[
+      UPDATE 
+         TB_GS_SUGST_BB
+      SET 
+         BU_CMT_T = NVL(BU_CMT_T,0)-1,
+         UPDT_PER_NO = #{wrPerNo},
+         UPDT_DTM = TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS')
+      WHERE 
+         BU_SEQ_NO = #{buSeqNo}
+      ]]>
+   </update>
+   
+   <update id="updateRplyBb"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+      /*   mgnt.gs.suggest.registration.SuggestRegistrationService.updateRplyBb*/
+      <![CDATA[
+      UPDATE 
+         TB_GS_SUGST_BB_CMT
+      SET 
+         CMT_CN = #{cmtCn},
+         UPDT_PER_NO = #{wrPerNo},
+         UPDT_DTM = TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS')
+      WHERE 
+         CMT_NO = #{cmtNo}
+      ]]>
+   </update>
+   
+   <delete id="deleteRplyBb"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+      /*   mgnt.gs.suggest.registration.SuggestRegistrationService.deleteRplyBb*/
+      <![CDATA[
+      DELETE FROM
+         TB_GS_SUGST_BB_CMT
+      WHERE 
+         CMT_NO = #{cmtNo}
+      ]]>
+   </delete>
+   
+   <select id="selectCommRpList"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO" resultType="egovMap">
+      /*   mgnt.gs.suggest.registration.SuggestRegistrationService.selectCommRpList*/
+        <![CDATA[
+         SELECT
+         	Y.BU_SEQ_NO,
+            Y.CMT_NO,
+            Y.WR_PER_NM,
+            Y.CMT_CN,
+            Y.WR_PER_NO,
+            Y.WR_DTM,
+            Y.RO
+         FROM(
+         	SELECT 
+	            X.BU_SEQ_NO,
+            	X.CMT_NO,
+            	X.WR_PER_NM,
+            	X.CMT_CN,
+            	X.WR_PER_NO,
+            	X.WR_DTM,
+            	ROWNUM AS RO
+         	FROM (
+	            SELECT
+               	BU_SEQ_NO,
+               	CMT_NO,
+               	WR_PER_NM,
+               	CMT_CN,
+               	WR_PER_NO,
+               	TO_CHAR(TO_DATE(WR_DTM,'YYYYMMDDHH24MISS'),'YYYY.MM.DD HH24:MI') AS WR_DTM
+            	FROM TB_GS_SUGST_BB_CMT
+            WHERE
+            	BU_SEQ_NO = #{buSeqNo}
+            ORDER BY
+            	CMT_NO DESC
+         	)X
+         )Y
+         WHERE
+         	Y.RO > #{firstIndex} AND Y.RO <= #{firstIndex} + #{recordCountPerPage}
+      ]]>
+   </select>
+   <select id="selectCommRpListCnt"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO"
+      resultType="java.lang.Integer">
+      /*   mgnt.gs.suggest.registration.SuggestRegistrationService.selectCommRpListCnt*/
+      SELECT
+         COUNT(*) FROM (
+            SELECT
+               X.*,
+               ROWNUM AS RO
+            FROM (
+               SELECT
+                  BU_SEQ_NO
+               FROM TB_GS_SUGST_BB_CMT
+               WHERE
+                  BU_SEQ_NO = #{buSeqNo}
+               ORDER BY
+               CMT_NO ASC
+            ) X
+         ) Z
+   </select>
+   <select id="checkReBb" parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO"
+       resultType="integer">
+       /*   mgnt.gs.suggest.registration.SuggestRegistrationService.checkReBb*/
+       SELECT BU_RPLY_LVL_NO 
+       FROM TB_GS_SUGST_BB
+       WHERE 
+          BU_GRP_RPLY_OR= #{buGrpRplyOr}+1 AND
+          BU_GRP_NO = #{buGrpNo} AND
+          DEL_YN = 'N'
+   </select>
+   
+   <select id="getCommCodeList" parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO" resultType="egovMap">
+		/* mgnt.gs.suggest.registration.SuggestRegistrationService.getCommCodeList  */
+		SELECT
+			CD_ID,
+			CD_INS_V,
+			CD_INS_NM,
+			REF_VAL1
+		FROM
+			TB_LS_COMM_CD
+		WHERE
+			CD_ID = #{cdId}
+			AND USE_YN = 'Y'
+	  	ORDER BY
+	  		SORT_OR ASC
+	</select>
+	
+	<update id="updateSgtVote" >
+		/* mgnt.gs.suggest.registration.SuggestRegistrationService."updateSgtVote"  */
+	<![CDATA[
+	    UPDATE TB_GS_SUGST_BB
+		SET
+		    VOTE_YN = '2',
+		    UPDT_PER_NO = '0',
+		    UPDT_DTM = TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS')
+		WHERE BU_SEQ_NO IN (
+					        SELECT 
+					           BU_SEQ_NO
+					        FROM
+					            TB_GS_SUGST_BB A
+					        WHERE
+					            VOTE_YN = '1'
+					            AND TO_NUMBER(TO_CHAR(TO_DATE(WR_DTM, 'YYYYMMDDHH24MISS')+30,'YYYYMMDD')) <=  TO_NUMBER(TO_CHAR(SYSDATE, 'YYYYMMDD'))
+					        )
+	]]>
+   </update>
+   
+   <insert id="insertAtchFile" parameterType="hashmap">
+		<![CDATA[
+		/* MgntGsForumRegistrationService_insertForumSessInfo_S03 */
+		INSERT INTO TB_GS_SUGST_BB_ATCH (
+			BU_SEQ_NO, ATCH_FILE_NO, ATCH_FILE_DIV_CD
+			, ATCH_FILE_NM, ATCH_FILE_SAVE_NM, ATCH_FILE_SZ
+			, IMG_DSP_YN
+		) VALUES ( 
+			#{buSeqNo}, #{atchFileNo}, #{atchFileDivCd}
+			, #{atchFileNm}, #{atchFileSaveNm}, #{atchFileSz}
+			, #{imgDspYn}
+		)
+		]]>
+	</insert>
+	
+	<update id="updateImagePath"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+	<![CDATA[
+      UPDATE 
+         TB_GS_SUGST_BB
+      SET
+         IMAGE_PATH = #{imagePath}
+      WHERE 
+         BU_SEQ_NO = #{buSeqNo}
+	]]>
+   </update>   
+   
+   <delete id="deleteAtchFile"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+	<![CDATA[
+		
+		DELETE FROM TB_GS_SUGST_BB_ATCH
+		WHERE
+			BU_SEQ_NO = #{buSeqNo}
+
+	]]>
+   </delete> 
+   
+   <select id="selectAtchInfoList"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO" resultType="egovMap">
+      /*   mgnt.gs.suggest.registration.SuggestRegistrationService."selectAtchInfoList"*/
+      <![CDATA[
+      	
+      	SELECT
+			A.ATCH_FILE_NO
+			,ATCH_FILE_DIV_CD
+			,ATCH_FILE_NM
+			,ATCH_FILE_SAVE_NM
+			,ATCH_FILE_SZ 
+		FROM 
+		    TB_GS_SUGST_BB_ATCH A
+		WHERE
+		    BU_SEQ_NO = #{buSeqNo}
+      
+      ]]>
+   </select>
+    -->
+</mapper>
