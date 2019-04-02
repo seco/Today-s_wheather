@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="MgntGsSuggestRegistrationService">
+<mapper namespace="portal.home">
 	
 <!--     <resultMap type="java.util.HashMap" id="tempSuggestInfo">
       <result property="titNm" 	     column="TIT_NM"         javaType="java.lang.String" />
@@ -20,6 +20,55 @@
       <result property="sgtTgtCd"    column="SGT_TGT_CD"     javaType="java.lang.String" />
       <result property="sgtTgtNm"    column="SGT_TGT_NM"     javaType="java.lang.String" />
    </resultMap> -->
+   
+   <select id="checkId"
+      parameterType="java.lang.string"
+      resultType="java.lang.Integer">
+      /*   portal.home.checkId  */
+	  <![CDATA[
+	      SELECT count(*)
+	      FROM TB_WHT_USER_BB
+	      WHERE
+	      	USER_Id = #{userId};
+      ]]>
+   </select>
+   
+   <insert id="insertSuggest"
+      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+      /* portal.n*/
+      <selectKey keyProperty="userNo" resultType="String" order= "BEFORE">
+         SELECT SEQ_WTH_USER.NEXTVAL FROM DUAL
+      </selectKey>
+      <![CDATA[
+         INSERT INTO TB_WTH_USER_BB
+         (
+            USER_NO,
+            USER_ID,
+            USER_PASS,
+            USER_BIRTH,
+            USER_PNO,
+            USER_EMAIL,
+            WR_USER_NO,
+            WR_DTM,
+            UPDT_USER_NO,
+            UPDT_DTM
+         ) 
+      VALUES 
+         (
+             ${userNo},
+             ${userId},
+             ${userPass},
+             ${userBirth},
+             ${userPno},
+             ${userEmail},
+             ${userNo},
+             TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS'),
+             ${userNo},
+             TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS')
+         )
+      ]]>
+   </insert>
+   
  <!--    
    <select id="selectCommBbList"
       parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO"
@@ -464,6 +513,7 @@
           BU_RECM_T = BU_RECM_T+1
       WHERE BU_SEQ_NO = #{buSeqNo}
    </update>
+   
    
    <insert id="insertReBb"
       parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
