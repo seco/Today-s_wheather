@@ -1,18 +1,14 @@
 package portal.common.crypt;
 
-import javax.inject.Inject;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
-@Service("shaEncoder")
+
 public class SHAUtil {
 
-	@Inject
+	@Autowired
     PasswordEncoder encoder;
 	
-    
-
     public String encoding(String str){
      return encoder.encode(str);
     }

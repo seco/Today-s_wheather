@@ -22,7 +22,7 @@
    </resultMap> -->
    
    <select id="checkId"
-      parameterType="java.lang.string"
+      parameterType="String"
       resultType="java.lang.Integer">
       /*   portal.home.checkId  */
 	  <![CDATA[
@@ -34,7 +34,7 @@
    </select>
    
    <insert id="insertSuggest"
-      parameterType="mgnt.gs.suggest.registration.service.MgntGsSuggestRegistrationVO">
+      parameterType="portal.home.service.UserVo">
       /* portal.n*/
       <selectKey keyProperty="userNo" resultType="String" order= "BEFORE">
          SELECT SEQ_WTH_USER.NEXTVAL FROM DUAL

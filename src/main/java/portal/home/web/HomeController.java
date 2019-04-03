@@ -20,7 +20,7 @@ import portal.home.service.UserVo;
 @Controller
 public class HomeController {
 
-	@Resource(name="shaEncoder")
+	
 	private SHAUtil encoder;
 	
 	@Resource(name = "HomeService")
@@ -56,8 +56,5 @@ public class HomeController {
 		}else{
 			return null;
 		}
-			
-		
-		
 	}
 }
